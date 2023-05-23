@@ -14,6 +14,10 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = mysql.createPool({
+    // host: '127.0.0.1',
+    // user: `${process.env.DB_USER}`,
+    // password: `${process.env.DB_PASS}`,
+    // database: 'pbsofficeinfo',
     host: 'db4free.net',
     user: `${process.env.DB_USER}`,
     password: `${process.env.DB_PASS}`,
@@ -28,6 +32,16 @@ app.get('/users', async (req, res) => {
     const sqlSelect =
         "SELECT * FROM users";
     db.query(sqlSelect, (err, result) => {
+        res.send(result);
+    });
+});
+// get users by zonal
+app.get('/usersByzonal/:zonal_code', async (req, res) => {
+
+    const zonal_code = req.params.zonal_code;
+    const sqlSelect =
+        "SELECT * FROM users where zonal_code=?";
+    db.query(sqlSelect, [zonal_code], (err, result) => {
         res.send(result);
     });
 });
@@ -59,6 +73,22 @@ app.get('/user/:email', async (req, res) => {
         "SELECT * FROM users WHERE email=(?)";
     db.query(sqlSelect, [email], (err, result) => {
         res.send(result);
+    });
+})
+// get Lgin Details 
+app.get('/Login', async (req, res) => {
+    // console.log(req.query.trg_id);
+    // console.log(req.query.password);
+
+    const trg_id = req.query.trg_id;
+    const password = req.query.password;
+    const sqlSelect =
+        "SELECT * FROM users WHERE trg_id=? and password=?";
+    db.query(sqlSelect, [trg_id, password], (err, result) => {
+        if (result) {
+            res.send('valid');
+        };
+
     });
 })
 // get single user  by id
@@ -170,6 +200,15 @@ app.get('/books', async (req, res) => {
     const sqlSelect =
         "(SELECT book_information.id,book_information.bookNo,book_information.numberOfConsumer,book_information.numberOfDcConsumer,book_information.pbs_code,book_information.zonal_code,book_information.cc_code,users.displayName,users.designation FROM book_information INNER JOIN tbl_pbs ON book_information.pbs_code = tbl_pbs.pbs_code INNER JOIN tbl_zonal ON book_information.zonal_code = tbl_zonal.zonal_code INNER JOIN tbl_cc ON book_information.cc_code = tbl_cc.cc_code INNER JOIN users ON book_information.assign_to = users.trg_id ORDER BY book_information.assign_to DESC)";
     db.query(sqlSelect, (err, result) => {
+        res.send(result);
+    });
+});
+// get Books  by zonal
+app.get('/booksByzonal/:zonal_code', async (req, res) => {
+    const zonal_code = req.params.zonal_code;
+    const sqlSelect =
+        "(SELECT book_information.id,book_information.bookNo,book_information.numberOfConsumer,book_information.numberOfDcConsumer,book_information.pbs_code,book_information.zonal_code,book_information.cc_code,users.displayName,users.designation FROM book_information INNER JOIN tbl_pbs ON book_information.pbs_code = tbl_pbs.pbs_code INNER JOIN tbl_zonal ON book_information.zonal_code = tbl_zonal.zonal_code INNER JOIN tbl_cc ON book_information.cc_code = tbl_cc.cc_code INNER JOIN users ON book_information.assign_to = users.trg_id where book_information.zonal_code=? ORDER BY book_information.assign_to DESC)";
+    db.query(sqlSelect, [zonal_code], (err, result) => {
         res.send(result);
     });
 });
