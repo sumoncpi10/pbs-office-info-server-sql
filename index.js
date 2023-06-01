@@ -40,7 +40,7 @@ app.get('/usersByzonal/:zonal_code', async (req, res) => {
 
     const zonal_code = req.params.zonal_code;
     const sqlSelect =
-        "SELECT * FROM users where zonal_code=?";
+        "SELECT * FROM users where zonal_code=? or zonal_code is null";
     db.query(sqlSelect, [zonal_code], (err, result) => {
         res.send(result);
     });
@@ -60,7 +60,26 @@ app.post('/userAdd', async (req, res) => {
     const add_by = req.body.add_by;
 
     const sqlInsert =
-        "INSERT INTO users (displayName,trg_id,email,password,designation,phone,pbs_code,zonal_code,add_by) VALUES (?,?,?,?,?,?,?)";
+        "INSERT INTO users (displayName,trg_id,email,password,designation,phone,pbs_code,zonal_code,add_by) VALUES (?,?,?,?,?,?,?,?,?)";
+    db.query(sqlInsert, [displayName, trg_id, email, password, designation, phone, pbs_code, zonal_code, add_by], (err, result) => {
+        res.send(result);
+    });
+});
+// add User Google
+app.post('/userAddG', async (req, res) => {
+
+    const displayName = req.body.displayName;
+    const trg_id = req.body.trg_id;
+    const email = req.body.email;
+    const password = req.body.password;
+    const designation = req.body.designation;
+    const phone = req.body.phone;
+    const pbs_code = req.body.pbs_code;
+    const zonal_code = req.body.zonal_code;
+    const add_by = req.body.add_by;
+
+    const sqlInsert =
+        "INSERT INTO users (displayName,trg_id,email,password,designation,phone,pbs_code,zonal_code,add_by) VALUES (?,?,?,?,?,?,?,?,?)";
     db.query(sqlInsert, [displayName, trg_id, email, password, designation, phone, pbs_code, zonal_code, add_by], (err, result) => {
         res.send(result);
     });
@@ -85,9 +104,12 @@ app.get('/Login', async (req, res) => {
     const sqlSelect =
         "SELECT * FROM users WHERE trg_id=? and password=?";
     db.query(sqlSelect, [trg_id, password], (err, result) => {
-        if (result) {
-            res.send('valid');
-        };
+        // console.log(result)
+        if (result == "") {
+            res.send({ valid: "invalid" });
+        } else {
+            res.send({ valid: "valid" });
+        }
 
     });
 })
