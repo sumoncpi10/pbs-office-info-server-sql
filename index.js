@@ -407,6 +407,57 @@ app.get('/Collection', async (req, res) => {
 
 
 });
+// get Collection  
+app.get('/kws', async (req, res) => {
+    // const bookNo = req.params.bookNo;
+    const sqlSelect =
+        "SELECT * from kwh_sales WHERE month = MONTH(CURRENT_TIMESTAMP) AND year = YEAR(CURRENT_TIMESTAMP) order by today";
+    db.query(sqlSelect, (err, result) => {
+        res.send(result);
+    });
+    // const query = {};
+    // const cursor = cashCollection.find(query);
+    // const users = await cursor.toArray();
+    // res.send(users);
+});
+//get kwh by office & month
+app.get('/kw', async (req, res) => {
+    const pbs_code = req.query.pbs_code;
+    const zonal_code = req.query.zonal_code;
+    const year = req.query.year;
+    const month = req.query.month;
+
+    console.log(pbs_code, zonal_code, year, month);
+    let sqlSelect = '';
+    if (pbs_code && zonal_code && year && month) {
+        sqlSelect =
+            "SELECT * from kwh_sales WHERE pbs_code=? and zonal_code=? and year=? and month=? order by kw_id";
+        db.query(sqlSelect, [pbs_code, zonal_code, year, month], (err, result) => {
+            res.send(result);
+        });
+    }
+    else if (pbs_code && zonal_code && year) {
+        sqlSelect =
+            "SELECT * from kwh_sales WHERE pbs_code=? and zonal_code=? and year=? order by kw_id";
+        db.query(sqlSelect, [pbs_code, zonal_code, year], (err, result) => {
+            res.send(result);
+        });
+    }
+    else if (pbs_code && year && month) {
+        sqlSelect =
+            "SELECT * from kwh_sales WHERE pbs_code=? and year=? and month=? order by kw_id";
+        db.query(sqlSelect, [pbs_code, year, month], (err, result) => {
+            res.send(result);
+        });
+    }
+    else if (pbs_code && year) {
+        sqlSelect =
+            "SELECT * from kwh_sales WHERE pbs_code=? and year=? order by kw_id";
+        db.query(sqlSelect, [pbs_code, year], (err, result) => {
+            res.send(result);
+        });
+    }
+});
 app.listen(port, () => {
     console.log(`Office Info app listening on port ${port}`)
 })
