@@ -302,6 +302,26 @@ app.post('/cashAdd', async (req, res) => {
         res.send(result);
     });
 });
+// KW Entry 
+app.post('/kwAdd', async (req, res) => {
+    const bookNo = req.body.bookNo;
+    const pbs_code = req.body.pbs_code;
+    const zonal_code = req.body.zonal_code;
+    const cc_code = req.body.cc_code;
+    const year = req.body.year;
+    const month = req.body.month;
+    const kw = req.body.kw;
+    const kwAmount = req.body.kwAmount;
+    const assign_to = req.body.assign_to;
+    const entered_by = req.body.entered_by;
+    const id = zonal_code + year + month + bookNo;
+    const sqlInsert =
+        "INSERT INTO kwh_sales (kw_id,bookNo,pbs_code,zonal_code,cc_code,year,month,kw,kwAmount,assign_to,today,entered_by) VALUES(?,?,?,?,?,?,?,?,?,?, CURRENT_TIMESTAMP,?)";
+    // console.log(sqlInsert)
+    db.query(sqlInsert, [id, bookNo, pbs_code, zonal_code, cc_code, year, month, kw, kwAmount, assign_to, entered_by], (err, result) => {
+        res.send(result);
+    });
+});
 // get Collection  
 app.get('/collections', async (req, res) => {
     // const bookNo = req.params.bookNo;
