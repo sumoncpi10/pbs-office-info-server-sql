@@ -240,7 +240,7 @@ app.get('/bookbyId/:id', async (req, res) => {
     const id = req.params.id;
     const sqlSelect =
 
-        "SELECT * FROM book_information  INNER JOIN users ON book_information.assign_to = users.trg_id WHERE book_information.id=?";
+        "SELECT book_information.bookNo,book_information.numberOfConsumer,book_information.numberOfDcConsumer,book_information.kw,book_information.assign_to,book_information.add_by,book_information.assign_to,book_information.pbs_code,book_information.zonal_code,book_information.cc_code FROM book_information INNER JOIN users ON book_information.assign_to = users.trg_id WHERE book_information.id=?";
     db.query(sqlSelect, [id], (err, result) => {
         res.send(result);
     });
