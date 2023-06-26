@@ -18,14 +18,14 @@ const db = mysql.createPool({
     // user: `${process.env.DB_USER}`,
     // password: `${process.env.DB_PASS}`,
     // database: 'pbsofficeinfo',
-    host: 'sql.freedb.tech',
-    user: `${process.env.DB_USER}`,
-    password: `${process.env.DB_PASS}`,
-    database: 'freedb_pbsofficeinfo',
-    // host: 'db4free.net',
+    // host: 'sql.freedb.tech',
     // user: `${process.env.DB_USER}`,
     // password: `${process.env.DB_PASS}`,
-    // database: 'pbsofficeinfo',
+    // database: 'freedb_pbsofficeinfo',
+    host: 'db4free.net',
+    user: `${process.env.DB_USER}`,
+    password: `${process.env.DB_PASS}`,
+    database: 'pbsofficeinfo',
 });
 // console.log(db)
 app.get('/', (req, res) => {
