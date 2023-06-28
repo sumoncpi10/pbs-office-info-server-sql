@@ -40,6 +40,7 @@ app.get('/users', async (req, res) => {
         res.send(result);
     });
 });
+
 // get users by zonal
 app.get('/usersByzonal/:zonal_code', async (req, res) => {
 
@@ -327,6 +328,24 @@ app.post('/kwAdd', async (req, res) => {
         res.send(result);
     });
 });
+// get Bills  
+app.get('/bills', async (req, res) => {
+    const sqlSelect =
+        "SELECT * FROM bill";
+    db.query(sqlSelect, (err, result) => {
+        res.send(result);
+    });
+});
+// get single Book  by bookno
+app.get('/bill/:smsAccountNumber', async (req, res) => {
+    const smsAccountNumber = req.params.smsAccountNumber;
+    const sqlSelect =
+
+        "SELECT * FROM bill   WHERE bill.smsAccountNumber=?";
+    db.query(sqlSelect, [smsAccountNumber], (err, result) => {
+        res.send(result);
+    });
+})
 // get Collection  
 app.get('/collections', async (req, res) => {
     // const bookNo = req.params.bookNo;
