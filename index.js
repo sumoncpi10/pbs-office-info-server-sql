@@ -1,6 +1,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const date = require('date-and-time')
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -10,9 +11,13 @@ const mysql = require("mysql");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Express 4.0
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
+// Express 3.0
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb' }));
 const db = mysql.createPool({
     // host: '127.0.0.1',
     // user: `${process.env.DB_USER}`,
@@ -27,6 +32,39 @@ const db = mysql.createPool({
     password: `${process.env.DB_PASS}`,
     database: 'pbsofficeinfo',
 });
+
+
+app.post('/import-csv',async(req,res)=>{
+    const data=req.body;
+    console.log(data)
+    var outputData = [];
+    // for(var i = 0; i < data.length; i++) {
+    //     var input = data[i];
+    //     // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+    //     outputData.push([input.zonal_code, input.bookNo,input.accountNo]);
+    // }
+  
+    // console.log(outputData)
+    // const sqlInsert =
+    //     "INSERT INTO ball values ?";
+    // db.query(sqlInsert, [outputData], (err, result) => {
+    //     res.send(result);
+    // });
+    const now  =  new Date();
+    for(var i = 0; i < data.length; i++) {
+        var input = data[i];
+        // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+        outputData.push([,input.zonal_code, input.bookNo,input.accountNo,input.billNo,input.billPeriod,input.load,input.kw,input.kwPeak,input.lpcDate,input.discDate,input.billAmount,input.lpcAmount,input.ArrearAmt,input.totalBill,input.totalBillWithLpc,input.cName,input.fName,input.cAddress,('10'+input.zonal_code+input.bookNo+input.accountNo)]);
+    }
+    // utc().format('YYYY-MM-DD HH:mm:ss')
+    // input.pbs_code,input.zonal_code, input.bookNo,input.accountNo,input.billNo,input.billPeriod,input.load,input.kw,input.kwPeak,input.lpcDate,input.discDate,input.billAmount,input.lpcAmount,input.ArrearAmt,input.totalBill,input.totalBillWithLpc,input.cName,input.fName,input.cAddress
+    // console.log(outputData)
+    const sqlInsert =
+        "INSERT INTO `bill` values ?";
+    db.query(sqlInsert, [outputData], (err, result) => {
+        res.send(result);
+    });
+})
 // console.log(db)
 app.get('/', (req, res) => {
     res.send('Working Office Info SQL');
