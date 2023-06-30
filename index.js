@@ -1,7 +1,8 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const date = require('date-and-time')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -138,6 +139,110 @@ app.get('/user/:email', async (req, res) => {
         res.send(result);
     });
 })
+// ...
+
+// Signup route
+app.post('/signup', (req, res) => {
+  const { role, phone, password ,smsAccountNumber} = req.body;
+console.log(role,phone,password,smsAccountNumber)
+  // Check if the user already exists in the database
+  db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+    if (error) {
+      console.error('Error executing query:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // If the user does not exist, hash the password and store the user in the database
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+      if (err) {
+        console.error('Error hashing password:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+
+      db.query('INSERT INTO users (role, phone, password, smsAccountNumber) VALUES (?, ?,?,?)', [role, phone, hashedPassword, smsAccountNumber], (err) => {
+        if (err) {
+          console.error('Error executing query:', err);
+          return res.status(500).json({ message: 'Server error' });
+        }
+        // Generate and sign a JWT
+            const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({ message: 'Signup successful!Please Login!!!' });
+      });
+    });
+  });
+});
+
+// ...
+
+// Login route
+// app.post('/loginn', (req, res) => {
+//   const { phone, password } = req.body;
+
+//   db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+//     if (error) {
+//       console.error('Error executing query:', error);
+//       return res.status(500).json({ message: 'Server error' });
+//     }
+
+//     if (results.length === 0) {
+//       return res.status(401).json({ message: 'User not found' });
+//     }
+
+//     const user = results[0];
+//     bcrypt.compare(password, user.password, (err, isMatch) => {
+//       if (err) {
+//         console.error('Error comparing passwords:', err);
+//         return res.status(500).json({ message: 'Server error' });
+//       }
+
+//       if (!isMatch) {
+//         return res.status(401).json({ message: 'Invalid password' });
+//       }
+
+//       // If the phone and password match, send a success response
+//       return res.status(200).json({ message: 'Login successful' });
+//     });
+//   });
+// });
+// Login route
+app.post('/login', (req, res) => {
+  const { phone, password } = req.body;
+
+  db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+    if (error) {
+      console.error('Error executing query:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const user = results[0];
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) {
+        console.error('Error comparing passwords:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid password' });
+      }
+
+      // Generate and sign a JWT
+      const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+      // If the phone and password match, send the JWT as a response
+      return res.status(200).json({ message: 'Login successful', token,user });
+    });
+  });
+});
+
 // get Lgin Details 
 app.get('/Login', async (req, res) => {
     // console.log(req.query.trg_id);
