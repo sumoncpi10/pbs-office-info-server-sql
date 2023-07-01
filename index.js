@@ -130,12 +130,12 @@ app.post('/userAddG', async (req, res) => {
     });
 });
 // get single user 
-app.get('/user/:email', async (req, res) => {
+app.get('/user/:phone', async (req, res) => {
     // console.log(req.params.username)
-    const email = req.params.email;
+    const phone = req.params.phone;
     const sqlSelect =
-        "SELECT * FROM users WHERE email=(?)";
-    db.query(sqlSelect, [email], (err, result) => {
+        "SELECT * FROM users WHERE phone=(?)";
+    db.query(sqlSelect, [phone], (err, result) => {
         res.send(result);
     });
 })
@@ -192,41 +192,25 @@ app.post('/signupEmp', (req, res) => {
     }
 
     // If the user does not exist, hash the password and store the user in the database
-    // bcrypt.hash(password, 10, (err, hashedPassword) => {
-    //   if (err) {
-    //     console.error('Error hashing password:', err);
-    //     return res.status(500).json({ message: 'Server error' });
-    //   }
-
-    //   db.query('INSERT INTO users (role,trg_id,phone,displayName,designation,email,password) VALUES (?, ?,?,?,?,?,?)', [role,trg_id,phone,displayName,designation,email,password], (err) => {
-    //     if (err) {
-    //       console.error('Error executing query:', err);
-    //       return res.status(500).json({ message: 'Server error' });
-    //     }
-    //     // Generate and sign a JWT
-    //         const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-
-    //     return res.status(200).json({ message: 'Create User successful!!!' });
-    //   });
-    // });
+ 
     bcrypt.hash(password, 10, (err, hashedPassword) => {
-  if (err) {
-    console.error('Error hashing password:', err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-
-  db.query('INSERT INTO users (role, trg_id, phone, displayName, designation, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)', [role, trg_id, phone, displayName, designation, email, hashedPassword], (err) => {
     if (err) {
-      console.error('Error executing query:', err);
-      return res.status(500).json({ message: 'Server error' });
+        console.error('Error hashing password:', err);
+        return res.status(500).json({ message: 'Server error' });
     }
 
-    // Generate and sign a JWT
-    const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    db.query('INSERT INTO users (role, trg_id, phone, displayName, designation, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)', [role, trg_id, phone, displayName, designation, email, hashedPassword], (err) => {
+        if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ message: 'Server error' });
+        }
 
-    return res.status(200).json({ message: 'Create User successful!!!' });
-  });
-});
+        // Generate and sign a JWT
+        const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({ message: 'Create User successful!!!' });
+    });
+    });
 
   });
 });
