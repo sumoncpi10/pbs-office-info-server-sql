@@ -34,32 +34,37 @@ const db = mysql.createPool({
     database: 'pbsofficeinfo',
 });
 
-
-app.post('/import-csv',async(req,res)=>{
-    const data=req.body;
+//import Customer
+app.post('/import-csv-cus', async (req, res) => {
+    const data = req.body;
     console.log(data)
     var outputData = [];
-    // for(var i = 0; i < data.length; i++) {
-    //     var input = data[i];
-    //     // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
-    //     outputData.push([input.zonal_code, input.bookNo,input.accountNo]);
-    // }
-  
-    // console.log(outputData)
-    // const sqlInsert =
-    //     "INSERT INTO ball values ?";
-    // db.query(sqlInsert, [outputData], (err, result) => {
-    //     res.send(result);
-    // });
-    const now  =  new Date();
-    for(var i = 0; i < data.length; i++) {
+
+    const now = new Date();
+    for (var i = 0; i < data.length; i++) {
         var input = data[i];
         // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
-        outputData.push([,input.zonal_code, input.bookNo,input.accountNo,input.billNo,input.billPeriod,input.load,input.kw,input.kwPeak,input.lpcDate,input.discDate,input.billAmount,input.lpcAmount,input.ArrearAmt,input.totalBill,input.totalBillWithLpc,input.cName,input.fName,input.cAddress,('10'+input.zonal_code+input.bookNo+input.accountNo)]);
+        outputData.push([, input.zonal_code, input.bookNo, input.accountNo, input.name, input.father, input.address, input.c_load, input.contactNumber, input.tariffCode, input.meterNumber, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
     }
-    // utc().format('YYYY-MM-DD HH:mm:ss')
-    // input.pbs_code,input.zonal_code, input.bookNo,input.accountNo,input.billNo,input.billPeriod,input.load,input.kw,input.kwPeak,input.lpcDate,input.discDate,input.billAmount,input.lpcAmount,input.ArrearAmt,input.totalBill,input.totalBillWithLpc,input.cName,input.fName,input.cAddress
-    // console.log(outputData)
+    console.log(outputData)
+    const sqlInsert =
+        "INSERT INTO `consumer` values ?";
+    db.query(sqlInsert, [outputData], (err, result) => {
+        res.send(result);
+    });
+})
+//import bill
+app.post('/import-csv', async (req, res) => {
+    const data = req.body;
+    console.log(data)
+    var outputData = [];
+
+    const now = new Date();
+    for (var i = 0; i < data.length; i++) {
+        var input = data[i];
+        // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+        outputData.push([, input.zonal_code, input.bookNo, input.accountNo, input.billNo, input.billPeriod, input.load, input.kw, input.kwPeak, input.lpcDate, input.discDate, input.billAmount, input.lpcAmount, input.ArrearAmt, input.totalBill, input.totalBillWithLpc, input.cName, input.fName, input.cAddress, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
+    }
     const sqlInsert =
         "INSERT INTO `bill` values ?";
     db.query(sqlInsert, [outputData], (err, result) => {
@@ -143,76 +148,76 @@ app.get('/user/:phone', async (req, res) => {
 
 // Signup route
 app.post('/signup', (req, res) => {
-  const { role, phone, password ,smsAccountNumber} = req.body;
-console.log(role,phone,password,smsAccountNumber)
-  // Check if the user already exists in the database
-  db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    if (results.length > 0) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // If the user does not exist, hash the password and store the user in the database
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) {
-        console.error('Error hashing password:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
-
-      db.query('INSERT INTO users (role, phone, password, smsAccountNumber) VALUES (?, ?,?,?)', [role, phone, hashedPassword, smsAccountNumber], (err) => {
-        if (err) {
-          console.error('Error executing query:', err);
-          return res.status(500).json({ message: 'Server error' });
+    const { role, phone, password, smsAccountNumber } = req.body;
+    console.log(role, phone, password, smsAccountNumber)
+    // Check if the user already exists in the database
+    db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return res.status(500).json({ message: 'Server error' });
         }
-        // Generate and sign a JWT
-            const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
-        return res.status(200).json({ message: 'Signup successful!Please Login!!!' });
-      });
+        if (results.length > 0) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // If the user does not exist, hash the password and store the user in the database
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error('Error hashing password:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            db.query('INSERT INTO users (role, phone, password, smsAccountNumber) VALUES (?, ?,?,?)', [role, phone, hashedPassword, smsAccountNumber], (err) => {
+                if (err) {
+                    console.error('Error executing query:', err);
+                    return res.status(500).json({ message: 'Server error' });
+                }
+                // Generate and sign a JWT
+                const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+                return res.status(200).json({ message: 'Signup successful!Please Login!!!' });
+            });
+        });
     });
-  });
 });
 // Signup route Employee
 app.post('/signupEmp', (req, res) => {
-  const { role,trg_id,phone,displayName,designation,email,password} = req.body;
-// console.log(role,trg_id,phone,displayName,designation,email,password)
-  // Check if the user already exists in the database
-  db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    if (results.length > 0) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // If the user does not exist, hash the password and store the user in the database
- 
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-    if (err) {
-        console.error('Error hashing password:', err);
-        return res.status(500).json({ message: 'Server error' });
-    }
-
-    db.query('INSERT INTO users (role, trg_id, phone, displayName, designation, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)', [role, trg_id, phone, displayName, designation, email, hashedPassword], (err) => {
-        if (err) {
-        console.error('Error executing query:', err);
-        return res.status(500).json({ message: 'Server error' });
+    const { role, trg_id, phone, displayName, designation, email, password } = req.body;
+    // console.log(role,trg_id,phone,displayName,designation,email,password)
+    // Check if the user already exists in the database
+    db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return res.status(500).json({ message: 'Server error' });
         }
 
-        // Generate and sign a JWT
-        const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+        if (results.length > 0) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
 
-        return res.status(200).json({ message: 'Create User successful!!!' });
-    });
-    });
+        // If the user does not exist, hash the password and store the user in the database
 
-  });
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error('Error hashing password:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            db.query('INSERT INTO users (role, trg_id, phone, displayName, designation, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)', [role, trg_id, phone, displayName, designation, email, hashedPassword], (err) => {
+                if (err) {
+                    console.error('Error executing query:', err);
+                    return res.status(500).json({ message: 'Server error' });
+                }
+
+                // Generate and sign a JWT
+                const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+                return res.status(200).json({ message: 'Create User successful!!!' });
+            });
+        });
+
+    });
 });
 
 // ...
@@ -249,36 +254,36 @@ app.post('/signupEmp', (req, res) => {
 // });
 // Login route
 app.post('/login', (req, res) => {
-  const { phone, password } = req.body;
+    const { phone, password } = req.body;
 
-  db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      return res.status(500).json({ message: 'Server error' });
-    }
+    db.query('SELECT * FROM users WHERE phone = ?', [phone], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return res.status(500).json({ message: 'Server error' });
+        }
 
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'User not found' });
-    }
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'User not found' });
+        }
 
-    const user = results[0];
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) {
-        console.error('Error comparing passwords:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
+        const user = results[0];
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.error('Error comparing passwords:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
 
-      if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid password' });
-      }
+            if (!isMatch) {
+                return res.status(401).json({ message: 'Invalid password' });
+            }
 
-      // Generate and sign a JWT
-      const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            // Generate and sign a JWT
+            const token = jwt.sign({ userId: phone }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
-      // If the phone and password match, send the JWT as a response
-      return res.status(200).json({ message: 'Login successful', token,user });
+            // If the phone and password match, send the JWT as a response
+            return res.status(200).json({ message: 'Login successful', token, user });
+        });
     });
-  });
 });
 
 // get Lgin Details 
