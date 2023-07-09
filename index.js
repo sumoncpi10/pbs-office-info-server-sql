@@ -63,7 +63,7 @@ app.post('/import-csv', async (req, res) => {
     for (var i = 0; i < data.length; i++) {
         var input = data[i];
         // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
-        outputData.push([, input.zonal_code, input.bookNo, input.accountNo, input.billNo, input.billPeriod, input.load, input.kw, input.kwPeak, input.lpcDate, input.discDate, input.billAmount, input.lpcAmount, input.ArrearAmt, input.totalBill, input.totalBillWithLpc, input.cName, input.fName, input.cAddress, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
+        outputData.push([, input.zonal_code, input.bookNo, input.accountNo, input.billNo, input.billPeriod, input.load, input.kw, input.kwPeak, input.lpcDate, input.discDate, input.billAmount, input.lpcAmount, input.ArrearAmt, input.totalBill, input.totalBillWithLpc, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
     }
     const sqlInsert =
         "INSERT INTO `bill` values ?";
