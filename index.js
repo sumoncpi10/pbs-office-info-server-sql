@@ -44,7 +44,7 @@ app.post('/import-csv-cus', async (req, res) => {
     for (var i = 0; i < data.length; i++) {
         var input = data[i];
         // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
-        outputData.push([, input.zonal_code, input.bookNo, input.accountNo, input.name, input.father, input.address, input.c_load, input.contactNumber, input.tariffCode, input.meterNumber, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
+        outputData.push([, input.zonal_code, input.custId, input.bookNo, input.accountNo, input.name, input.father, input.address, input.c_load, input.contactNumber, input.tariffCode, input.meterNumber, ('10' + input.zonal_code + input.bookNo + input.accountNo)]);
     }
     console.log(outputData)
     const sqlInsert =
