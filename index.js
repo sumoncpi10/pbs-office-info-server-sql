@@ -13,12 +13,12 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 // Express 4.0
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+app.use(bodyParser.json({ limit: '20mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
 
 // Express 3.0
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb' }));
 const db = mysql.createPool({
     // host: '127.0.0.1',
     // user: `${process.env.DB_USER}`,
@@ -49,6 +49,25 @@ app.post('/import-csv-cus', async (req, res) => {
     console.log(outputData)
     const sqlInsert =
         "INSERT INTO `consumer` values ?";
+    db.query(sqlInsert, [outputData], (err, result) => {
+        res.send(result);
+    });
+})
+//import Customer
+app.post('/import-csv-arrear', async (req, res) => {
+    const data = req.body;
+    console.log(data)
+    var outputData = [];
+
+    const now = new Date();
+    for (var i = 0; i < data.length; i++) {
+        var input = data[i];
+        // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+        outputData.push([, input.zonal_code, input.custId, input.arrBillPeriod, input.arrTotal]);
+    }
+    console.log(outputData)
+    const sqlInsert =
+        "INSERT INTO `arrear` values ?";
     db.query(sqlInsert, [outputData], (err, result) => {
         res.send(result);
     });
@@ -532,6 +551,16 @@ app.get('/bill/:smsAccountNumber', async (req, res) => {
         res.send(result);
     });
 })
+// get DNP List  
+app.get('/dnpList', async (req, res) => {
+    const zonal_code = req.query.zonal_code;
+    const bookNo = req.query.bookNo;
+    const sqlSelect =
+        "SELECT * FROM consumer INNER JOIN arrear ON consumer.custId=arrear.custId WHERE consumer.`bookNo`=? and consumer.zonal_code=? order by consumer.accountNo;";
+    db.query(sqlSelect, [bookNo, zonal_code], (err, result) => {
+        res.send(result);
+    });
+});
 // get Collection  
 app.get('/collections', async (req, res) => {
     // const bookNo = req.params.bookNo;
