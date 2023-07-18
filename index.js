@@ -545,8 +545,7 @@ app.get('/bills', async (req, res) => {
 app.get('/bill/:smsAccountNumber', async (req, res) => {
     const smsAccountNumber = req.params.smsAccountNumber;
     const sqlSelect =
-
-        "SELECT * FROM bill   WHERE bill.smsAccountNumber=?";
+        "SELECT * FROM bill INNER JOIN consumer on bill.smsAccountNumber=consumer.smsAccountNumber WHERE bill.smsAccountNumber=?";
     db.query(sqlSelect, [smsAccountNumber], (err, result) => {
         res.send(result);
     });
