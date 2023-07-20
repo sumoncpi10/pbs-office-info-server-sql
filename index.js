@@ -56,22 +56,65 @@ app.post('/import-csv-cus', async (req, res) => {
 //import Customer
 app.post('/import-csv-arrear', async (req, res) => {
     const data = req.body;
-    console.log(data)
+    // console.log(data)
     var outputData = [];
 
     const now = new Date();
     for (var i = 0; i < data.length; i++) {
         var input = data[i];
-        // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+        // var smsAccountNumber = ('10' + input.zonal_code + input.bookNo + input.accountNo);
         outputData.push([, input.zonal_code, input.custId, input.arrBillPeriod, input.arrTotal]);
     }
-    console.log(outputData)
-    const sqlInsert =
-        "INSERT INTO `arrear` values ?";
-    db.query(sqlInsert, [outputData], (err, result) => {
-        res.send(result);
+    // console.log(outputData)
+    // console.log(data[0]?.zonal_code);
+
+    // Assuming 'zonal_code' is a string. If not, convert it to the appropriate type.
+    const zonal_code = data[0]?.zonal_code || '';
+
+    // Delete existing data for the specific 'zonal_code'
+    const sqlDelete = "DELETE FROM arrear WHERE zonal_code=?";
+    db.query(sqlDelete, [zonal_code], (err, deleteResult) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send("Error occurred while deleting data.");
+        } else {
+            // Insert the new data
+            const sqlInsert = "INSERT INTO `arrear` VALUES ?";
+            db.query(sqlInsert, [outputData], (err, insertResult) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send("Error occurred while inserting data.");
+                } else {
+                    res.send(insertResult);
+                }
+            });
+        }
     });
-})
+});
+
+// app.post('/import-csv-arrear', async (req, res) => {
+//     const data = req.body;
+//     // console.log(data)
+//     var outputData = [];
+
+//     const now = new Date();
+//     for (var i = 0; i < data.length; i++) {
+//         var input = data[i];
+//         // var smsAccountNumber=('10'+input.zonal_code+input.bookNo+input.accountNo);
+//         outputData.push([, input.zonal_code, input.custId, input.arrBillPeriod, input.arrTotal]);
+//     }
+//     // console.log(outputData)
+//     console.log(data[0].zonal_code);
+//     const sqlDelete = "DELETE * FROM arrear where zonal_code=?";
+//     db.query(sqlDelete, [data[0]?.zonal_code], (err, result) => {
+//         res.send(result);
+//     });
+//     const sqlInsert =
+//         "INSERT INTO `arrear` values ?";
+//     db.query(sqlInsert, [outputData], (err, result) => {
+//         res.send(result);
+//     });
+// })
 //import bill
 app.post('/import-csv', async (req, res) => {
     const data = req.body;
